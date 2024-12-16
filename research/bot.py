@@ -82,6 +82,8 @@ def get_ids():
     return ids
 
 
+
+
 def get_results():
     results = []
     for model, url in cars.CARS['VW'].items():

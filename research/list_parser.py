@@ -10,8 +10,8 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-URL = cars.CARS["VW"]["touareg"]
-DB = "db/vw/touareg.csv"
+URL = cars.CARS["BMW"]["x7"]
+DB = "db/bmw/x7.csv"
 DATE = time.strftime("%Y-%m-%d")
 
 
@@ -64,7 +64,7 @@ def parse_all(url):
             res.extend(tmp)
         else:
             failed.append(link)
-        time.sleep(0.5)
+        time.sleep(0.1)
     while len(failed) != 0:
         link = failed.pop()
         tmp = parse_list(link)

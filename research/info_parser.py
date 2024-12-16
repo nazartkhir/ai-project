@@ -3,11 +3,11 @@ import csv
 import time
 from bs4 import BeautifulSoup
 
-DB = "db/vw/passat.csv"
+DB = "db/bmw/x6.csv"
 
 def main():
     update(DB)
-    #parse_car("https://auto.ria.com/uk/auto_volkswagen_cc_passat_cc_36773069.html")
+    #parse_car("https://auto.ria.com/uk/auto_ford_fusion_37358678.html")
 
 def update(db):
     data = []
@@ -22,7 +22,7 @@ def update(db):
                     ctr+=1
                 except BaseException as e:
                     print(e)
-                    info = ["","","","","","","","",""]
+                    info = ["","","","","","","","","","","","","",""]
                 date = row[1]
                 tmp = [link, date]
                 tmp.extend(info)
@@ -45,13 +45,16 @@ def parse_car(url):
         print(f"!failed  {url}")
         return {}
     soup = BeautifulSoup(page.content, "html.parser")
+    
     data = soup.find("div", {"class": "ticket-status-0"})
+    location = data.find("section", {"id": "userInfoBlock"})
+    location = location.find_all("li", {"class": "item"})
+    location = location[1].text.strip()
     title = data.find("h1", {"class": "head"}).text
     try:
         subtitle = data.find("h3", {"class": "under-head"}).text
     except BaseException as e:
         subtitle = ""
-
     price = data.find("div", {"class": "price_value"}).find("strong").text
     tech = data.find("div", {"class": "technical-info", "id": "details"})
     dds = tech.find_all("dd")
@@ -61,6 +64,7 @@ def parse_car(url):
     dtp = 0
     hp = -1
     desc = ""
+    fuel = -1
     for dd in dds:
         texts.append(dd.text)
     for text in texts:
@@ -78,6 +82,14 @@ def parse_car(url):
         if splited[0] == "Участь":
             if splited[3] == "Був":
                 dtp = 1
+        if splited[0] == "Двигун":
+            for i, elem in enumerate(splited):
+                if "Газ" in elem:
+                    fuel = 2
+                elif "Бензин" in elem:
+                    fuel = 1
+                elif "Дизель" in elem:  
+                    fuel = 0
     year = int(title.split()[-1])
     price = price.split()
     price = price[:-1]
@@ -89,9 +101,20 @@ def parse_car(url):
             if "к.с." in elem:
                 hp = int(spl[i-1][1:])
         subtitle = subtitle.lower().replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
+    features = subtitle.split("•")
+    f1 = ""
+    f2 = ""
+    f3 = ""
+    if len(features) > 0:
+        f1 = features[0]
+    if len(features) > 1:    
+        f2 = features[1]
+    if len(features) > 2:
+        f3 = features[2]
     title = title.lower().replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
     desc = desc.lower().replace('\n', ' ').replace('\t', ' ').replace('\r', ' ')
-    tmp = [price, title, subtitle, year, hp, range, kp, dtp, desc]
+    desc = desc.replace(" читати ще сховати", "")
+    tmp = [price, title, subtitle, f1, f2, f3, year, hp, range, kp, dtp, fuel, location, desc]
     return tmp
     
 
